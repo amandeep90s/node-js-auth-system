@@ -23,5 +23,21 @@ export default {
     } catch (error) {
       httpError(next, error as Error, req, 500);
     }
+  },
+  register: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // TODO
+      // Body validation
+      // Phone number parsing & validation
+      // Timezone
+      // Check user existence using email address
+      // Encrypting password
+      // Account confirmation object data
+      // Creating user
+      // Sending confirmation email
+      httpResponse(req, res, 201, responseMessage.SUCCESS);
+    } catch (error) {
+      httpError(next, error as Error, req, 500);
+    }
   }
 };
