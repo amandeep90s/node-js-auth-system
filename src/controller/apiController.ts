@@ -35,12 +35,18 @@ export default {
       // TODO
       const { body } = req as IRegisterRequest;
       // Body validation
-      const { error } = validateJoiSchema<IRegisterRequestBody>(validateRegisterBody, body);
+      const { error, value } = validateJoiSchema<IRegisterRequestBody>(validateRegisterBody, body);
       if (error) {
         return httpError(next, error, req, 422);
       }
 
       // Phone number parsing & validation
+      const { phoneNumber } = value;
+      const { countryCode, internationalNumber, isoCode } = quicker.parsePhoneNumber('+' + phoneNumber);
+      if (!countryCode || !internationalNumber || !isoCode) {
+        return httpError(next, new Error(responseMessage.INVALID_PHONE_NUMBER), req, 422);
+      }
+
       // Timezone
       // Check user existence using email address
       // Encrypting password
