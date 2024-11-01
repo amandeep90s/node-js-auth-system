@@ -32,7 +32,6 @@ export default {
   },
   register: (req: Request, res: Response, next: NextFunction) => {
     try {
-      // TODO
       const { body } = req as IRegisterRequest;
       // Body validation
       const { error, value } = validateJoiSchema<IRegisterRequestBody>(validateRegisterBody, body);
