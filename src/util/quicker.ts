@@ -1,3 +1,4 @@
+import { getTimezonesForCountry } from 'countries-and-timezones';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import os from 'os';
 import config from '../config/config';
@@ -46,5 +47,8 @@ export default {
       logger.error(error);
       return defaultResponse;
     }
+  },
+  countryTimezone: (isoCode: string) => {
+    return getTimezonesForCountry(isoCode);
   }
 };

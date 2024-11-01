@@ -48,6 +48,11 @@ export default {
       }
 
       // Timezone
+      const timezone = quicker.countryTimezone(isoCode);
+      if (!timezone || timezone.length === 0) {
+        return httpError(next, new Error(responseMessage.INVALID_PHONE_NUMBER), req, 422);
+      }
+
       // Check user existence using email address
       // Encrypting password
       // Account confirmation object data
