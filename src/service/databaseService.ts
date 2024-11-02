@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import config from '../config/config';
 import User from '../model/userModel';
+import { IUser } from '../types/userTypes';
 import logger from '../util/logger';
 
 export default {
@@ -18,5 +19,6 @@ export default {
   },
   findUserByEmailAddress: async (emailAddress: string) => {
     return await User.findOne({ emailAddress });
-  }
+  },
+  registerUser: (payload: IUser) => User.create(payload)
 };

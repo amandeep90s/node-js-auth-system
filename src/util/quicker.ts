@@ -1,6 +1,9 @@
+import bcrypt from 'bcrypt';
 import { getTimezonesForCountry } from 'countries-and-timezones';
+import { randomInt } from 'crypto';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import os from 'os';
+import { v4 } from 'uuid';
 import config from '../config/config';
 import logger from './logger';
 
@@ -50,5 +53,13 @@ export default {
   },
   countryTimezone: (isoCode: string) => {
     return getTimezonesForCountry(isoCode);
+  },
+  hashPassword: (password: string) => bcrypt.hash(password, 10),
+  generateRandomId: () => v4(),
+  generateOtp: (length: number) => {
+    const min = Math.pow(10, length - 1);
+    const max = Math.pow(10, length) - 1;
+
+    return randomInt(min, max).toString();
   }
 };
