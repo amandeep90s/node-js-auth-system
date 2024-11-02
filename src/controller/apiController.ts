@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { NextFunction, Request, Response } from 'express';
 import config from '../config/config';
 import responseMessage from '../constant/responseMessage';
@@ -11,8 +13,19 @@ import httpResponse from '../util/httpResponse';
 import logger from '../util/logger';
 import quicker from '../util/quicker';
 
+dayjs.extend(utc);
+
 interface IRegisterRequest extends Request {
   body: IRegisterRequestBody;
+}
+
+interface IConfirmationRequest extends Request {
+  params: {
+    token: string;
+  };
+  query: {
+    code: string;
+  };
 }
 
 export default {
@@ -110,6 +123,47 @@ export default {
       });
 
       httpResponse(req, res, 201, responseMessage.SUCCESS, { _id: newUser._id });
+    } catch (error) {
+      httpError(next, error as Error, req, 500);
+    }
+  },
+  confirmation: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { params, query } = req as IConfirmationRequest;
+      const { token } = params;
+      const { code } = query;
+
+      // Fetch user by token & code
+      const user = await databaseService.findUserByConfirmationTokenAndCode(token, code);
+      if (!user) {
+        return httpError(next, new Error(responseMessage.INVALID_ACCOUNT_CONFIRMATION_TOKEN_OR_CODE), req, 400);
+      }
+
+      // Check if account already confirmed
+      const {
+        accountConfirmation: { status }
+      } = user;
+      if (status) {
+        return httpError(next, new Error(responseMessage.ACCOUNT_ALREADY_CONFIRMED), req, 400);
+      }
+
+      // Account confirm
+      user.accountConfirmation.status = true;
+      user.accountConfirmation.timestamp = dayjs().utc().toDate();
+      await user.save();
+
+      // Account confirmation email
+      const to = [user.emailAddress];
+      const subject = 'Account Confirmed';
+      const text = 'Your account has been confirmed';
+
+      emailService.sendEmail(to, subject, text).catch((err) => {
+        logger.error('EMAIL_SERVICE', {
+          meta: err as Error
+        });
+      });
+
+      httpResponse(req, res, 200, responseMessage.SUCCESS);
     } catch (error) {
       httpError(next, error as Error, req, 500);
     }

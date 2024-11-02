@@ -20,5 +20,10 @@ export default {
   findUserByEmailAddress: async (emailAddress: string) => {
     return await User.findOne({ emailAddress });
   },
-  registerUser: (payload: IUser) => User.create(payload)
+  registerUser: (payload: IUser) => User.create(payload),
+  findUserByConfirmationTokenAndCode: (token: string, code: string) =>
+    User.findOne({
+      'accountConfirmation.token': token,
+      'accountConfirmation.code': code
+    })
 };
