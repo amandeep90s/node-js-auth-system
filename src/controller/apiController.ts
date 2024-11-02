@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import responseMessage from '../constant/responseMessage';
+import databaseService from '../service/databaseService';
 import { validateJoiSchema, validateRegisterBody } from '../service/validationService';
 import { IRegisterRequestBody } from '../types/userTypes';
 import httpError from '../util/httpError';
@@ -30,7 +31,7 @@ export default {
       httpError(next, error as Error, req, 500);
     }
   },
-  register: (req: Request, res: Response, next: NextFunction) => {
+  register: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { body } = req as IRegisterRequest;
       // Body validation
@@ -40,7 +41,7 @@ export default {
       }
 
       // Phone number parsing & validation
-      const { phoneNumber } = value;
+      const { emailAddress, phoneNumber } = value;
       const { countryCode, internationalNumber, isoCode } = quicker.parsePhoneNumber('+' + phoneNumber);
       if (!countryCode || !internationalNumber || !isoCode) {
         return httpError(next, new Error(responseMessage.INVALID_PHONE_NUMBER), req, 422);
@@ -53,6 +54,10 @@ export default {
       }
 
       // Check user existence using email address
+      const isUserExist = await databaseService.findUserByEmailAddress(emailAddress);
+      if (isUserExist) {
+        return httpError(next, new Error(responseMessage.ALREADY_EXIST('user', emailAddress)), req, 422);
+      }
       // Encrypting password
       // Account confirmation object data
       // Creating user

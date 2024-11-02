@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import config from '../config/config';
+import User from '../model/userModel';
 import logger from '../util/logger';
 
 export default {
@@ -14,5 +15,8 @@ export default {
       logger.error('DATABASE_ERROR', { meta: { error } });
       throw new Error('Error connecting to database');
     }
+  },
+  findUserByEmailAddress: async (emailAddress: string) => {
+    return await User.findOne({ emailAddress });
   }
 };
