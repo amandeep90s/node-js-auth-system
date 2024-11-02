@@ -59,6 +59,7 @@
     "libphonenumber-js": "^1.11.12",
     "mongoose": "^8.7.3",
     "rate-limiter-flexible": "^5.0.4",
+    "resend": "^4.0.1-alpha.0",
     "source-map-support": "^0.5.21",
     "ts-migrate-mongoose": "^3.8.5",
     "uuid": "^11.0.2",

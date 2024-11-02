@@ -1,11 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
+import config from '../config/config';
 import responseMessage from '../constant/responseMessage';
 import { EUserRole } from '../constant/userConstant';
 import databaseService from '../service/databaseService';
+import emailService from '../service/emailService';
 import { validateJoiSchema, validateRegisterBody } from '../service/validationService';
 import { IRegisterRequestBody, IUser } from '../types/userTypes';
 import httpError from '../util/httpError';
 import httpResponse from '../util/httpResponse';
+import logger from '../util/logger';
 import quicker from '../util/quicker';
 
 interface IRegisterRequest extends Request {
@@ -95,6 +98,17 @@ export default {
 
       const newUser = await databaseService.registerUser(payload);
       // Sending confirmation email
+      const confirmationUrl = `${config.FRONTEND_URL}/confirmation/${token}?code=${code}`;
+      const to = [emailAddress];
+      const subject = 'Confirm Your Account';
+      const text = `Hey ${name}, Please confirm your account by clicking on the link given below \n\n${confirmationUrl}`;
+
+      emailService.sendEmail(to, subject, text).catch((err) => {
+        logger.error('EMAIL_SERVICE', {
+          meta: err as Error
+        });
+      });
+
       httpResponse(req, res, 201, responseMessage.SUCCESS, { _id: newUser._id });
     } catch (error) {
       httpError(next, error as Error, req, 500);
