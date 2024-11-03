@@ -8,6 +8,11 @@ export interface IRegisterRequestBody {
   consent: boolean;
 }
 
+export interface ILoginRequestBody {
+  emailAddress: string;
+  password: string;
+}
+
 export interface IUser {
   name: string;
   emailAddress: string;

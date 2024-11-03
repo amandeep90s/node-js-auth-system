@@ -6,8 +6,8 @@ import responseMessage from '../constant/responseMessage';
 import { EUserRole } from '../constant/userConstant';
 import databaseService from '../service/databaseService';
 import emailService from '../service/emailService';
-import { validateJoiSchema, validateRegisterBody } from '../service/validationService';
-import { IRegisterRequestBody, IUser } from '../types/userTypes';
+import { validateJoiSchema, validateLoginBody, validateRegisterBody } from '../service/validationService';
+import { ILoginRequestBody, IRegisterRequestBody, IUser } from '../types/userTypes';
 import httpError from '../util/httpError';
 import httpResponse from '../util/httpResponse';
 import logger from '../util/logger';
@@ -17,6 +17,10 @@ dayjs.extend(utc);
 
 interface IRegisterRequest extends Request {
   body: IRegisterRequestBody;
+}
+
+interface ILoginRequest extends Request {
+  body: ILoginRequestBody;
 }
 
 interface IConfirmationRequest extends Request {
@@ -163,6 +167,26 @@ export default {
         });
       });
 
+      httpResponse(req, res, 200, responseMessage.SUCCESS);
+    } catch (error) {
+      httpError(next, error as Error, req, 500);
+    }
+  },
+  login: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Validate & parse body
+      const { body } = req as ILoginRequest;
+
+      const { error } = validateJoiSchema<ILoginRequestBody>(validateLoginBody, body);
+      if (error) {
+        return httpError(next, error, req, 422);
+      }
+      // Find user
+      // Validate password
+      // Access & refresh token
+      // Last login info
+      // Refresh token store
+      // Cookie send
       httpResponse(req, res, 200, responseMessage.SUCCESS);
     } catch (error) {
       httpError(next, error as Error, req, 500);
