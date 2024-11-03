@@ -172,16 +172,22 @@ export default {
       httpError(next, error as Error, req, 500);
     }
   },
-  login: (req: Request, res: Response, next: NextFunction) => {
+  login: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Validate & parse body
       const { body } = req as ILoginRequest;
 
-      const { error } = validateJoiSchema<ILoginRequestBody>(validateLoginBody, body);
+      const { error, value } = validateJoiSchema<ILoginRequestBody>(validateLoginBody, body);
       if (error) {
         return httpError(next, error, req, 422);
       }
+
       // Find user
+      const { emailAddress } = value;
+      const user = await databaseService.findUserByEmailAddress(emailAddress);
+      if (!user) {
+        return httpError(next, new Error(responseMessage.NOT_FOUND('User')), req, 400);
+      }
       // Validate password
       // Access & refresh token
       // Last login info
