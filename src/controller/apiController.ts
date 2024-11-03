@@ -9,7 +9,7 @@ import { EUserRole } from '../constant/userConstant';
 import databaseService from '../service/databaseService';
 import emailService from '../service/emailService';
 import { validateJoiSchema, validateLoginBody, validateRegisterBody } from '../service/validationService';
-import { ILoginRequestBody, IRegisterRequestBody, IUser } from '../types/userTypes';
+import { ILoginRequestBody, IRefreshToken, IRegisterRequestBody, IUser } from '../types/userTypes';
 import httpError from '../util/httpError';
 import httpResponse from '../util/httpResponse';
 import logger from '../util/logger';
@@ -215,6 +215,9 @@ export default {
       await user.save();
 
       // Refresh token store
+      const refreshTokenPayload: IRefreshToken = { token: refreshToken };
+      await databaseService.createRefreshToken(refreshTokenPayload);
+
       // Cookie send
       const url = new URL(config.SERVER_URL as string);
       const domain = url.hostname;

@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import config from '../config/config';
+import RefreshToken from '../model/refreshTokenModel';
 import User from '../model/userModel';
-import { IUser } from '../types/userTypes';
+import { IRefreshToken, IUser } from '../types/userTypes';
 import logger from '../util/logger';
 
 export default {
@@ -25,5 +26,6 @@ export default {
     User.findOne({
       'accountConfirmation.token': token,
       'accountConfirmation.code': code
-    })
+    }),
+  createRefreshToken: (payload: IRefreshToken) => RefreshToken.create(payload)
 };
