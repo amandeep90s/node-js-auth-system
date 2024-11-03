@@ -1,7 +1,9 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { NextFunction, Request, Response } from 'express';
+import { URL } from 'node:url';
 import config from '../config/config';
+import { EApplicationEnvironment } from '../constant/application';
 import responseMessage from '../constant/responseMessage';
 import { EUserRole } from '../constant/userConstant';
 import databaseService from '../service/databaseService';
@@ -193,13 +195,47 @@ export default {
       // Validate password
       const isValidPassword = await quicker.comparePassword(password, user.password);
       if (!isValidPassword) {
-        return httpError(next, new Error(responseMessage.WRONG_CREDENTIALS), req, 404);
+        return httpError(next, new Error(responseMessage.WRONG_CREDENTIALS), req, 400);
       }
 
       // Access & refresh token
+      const accessToken = quicker.generateToken(
+        { userId: user.id as string },
+        config.ACCESS_TOKEN.SECRET as string,
+        config.ACCESS_TOKEN.EXPIRY
+      );
+      const refreshToken = quicker.generateToken(
+        { userId: user.id as string },
+        config.REFRESH_TOKEN.SECRET as string,
+        config.REFRESH_TOKEN.EXPIRY
+      );
+
       // Last login info
+      user.lastLoginAt = dayjs().utc().toDate();
+      await user.save();
+
       // Refresh token store
       // Cookie send
+      const url = new URL(config.SERVER_URL as string);
+      const domain = url.hostname;
+
+      res
+        .cookie('accessToken', accessToken, {
+          path: '/api/v1',
+          domain,
+          sameSite: 'strict',
+          maxAge: 1000 * config.ACCESS_TOKEN.EXPIRY,
+          httpOnly: true,
+          secure: config.ENV !== EApplicationEnvironment.DEVELOPMENT
+        })
+        .cookie('refreshToken', refreshToken, {
+          path: '/api/v1',
+          domain,
+          sameSite: 'strict',
+          maxAge: 1000 * config.REFRESH_TOKEN.EXPIRY,
+          httpOnly: true,
+          secure: config.ENV !== EApplicationEnvironment.DEVELOPMENT
+        });
       httpResponse(req, res, 200, responseMessage.SUCCESS);
     } catch (error) {
       httpError(next, error as Error, req, 500);

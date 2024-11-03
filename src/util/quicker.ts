@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { getTimezonesForCountry } from 'countries-and-timezones';
 import { randomInt } from 'crypto';
+import jwt from 'jsonwebtoken';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import os from 'os';
 import { v4 } from 'uuid';
@@ -63,5 +64,10 @@ export default {
     const max = Math.pow(10, length) - 1;
 
     return randomInt(min, max).toString();
+  },
+  generateToken: (payload: object, secret: string, expiry: number) => {
+    return jwt.sign(payload, secret, {
+      expiresIn: expiry
+    });
   }
 };
