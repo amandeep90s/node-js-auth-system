@@ -55,6 +55,8 @@ export default {
     return getTimezonesForCountry(isoCode);
   },
   hashPassword: (password: string) => bcrypt.hash(password, 10),
+  comparePassword: (attemptedPassword: string, encryptedPassword: string) =>
+    bcrypt.compare(attemptedPassword, encryptedPassword),
   generateRandomId: () => v4(),
   generateOtp: (length: number) => {
     const min = Math.pow(10, length - 1);

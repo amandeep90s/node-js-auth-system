@@ -183,12 +183,19 @@ export default {
       }
 
       // Find user
-      const { emailAddress } = value;
-      const user = await databaseService.findUserByEmailAddress(emailAddress);
+      const { emailAddress, password } = value;
+      const user = await databaseService.findUserByEmailAddress(emailAddress, '+password');
+
       if (!user) {
-        return httpError(next, new Error(responseMessage.NOT_FOUND('User')), req, 400);
+        return httpError(next, new Error(responseMessage.NOT_FOUND('User')), req, 404);
       }
+
       // Validate password
+      const isValidPassword = await quicker.comparePassword(password, user.password);
+      if (!isValidPassword) {
+        return httpError(next, new Error(responseMessage.WRONG_CREDENTIALS), req, 404);
+      }
+
       // Access & refresh token
       // Last login info
       // Refresh token store

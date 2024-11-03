@@ -17,8 +17,8 @@ export default {
       throw new Error('Error connecting to database');
     }
   },
-  findUserByEmailAddress: async (emailAddress: string) => {
-    return await User.findOne({ emailAddress });
+  findUserByEmailAddress: async (emailAddress: string, select: string = '') => {
+    return await User.findOne({ emailAddress }).select(select);
   },
   registerUser: (payload: IUser) => User.create(payload),
   findUserByConfirmationTokenAndCode: (token: string, code: string) =>
